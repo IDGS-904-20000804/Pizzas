@@ -1,0 +1,148 @@
+﻿@model Pizzas.Models.MakePurchase
+
+@{
+    ViewBag.Title = "Buy pizzas";
+}
+
+<h2>Purchase</h2>
+<p>Fill the next form for buy a pizza/s:</p>
+<hr />
+<div class="row">
+    @using (Html.BeginForm("doPurchase", "Home", FormMethod.Post, new { @class = "col-3" }))
+    {
+        @Html.AntiForgeryToken()
+        <div class="form-horizontal">
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <div class="form-group">
+                @Html.Label("Client", htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.purchase.nameClient, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.purchase.nameClient, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.Label("Address", htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.purchase.addressClient, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.purchase.addressClient, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.Label("Phone", htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.purchase.phoneClient, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.purchase.phoneClient, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.Label("Total", htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @{
+                        Model.purchase.total = ViewBag.total;
+                    }
+                    @Html.EditorFor(model => model.purchase.total, new { htmlAttributes = new { @class = "form-control bg-light", @readonly = "readonly", @value = Model.purchase.total } })
+                    @Html.ValidationMessageFor(model => model.purchase.total, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <br />
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="Buy" class="btn btn-success" />
+                </div>
+            </div>
+        </div>
+    }
+    <div class="col-9">
+            @using (Html.BeginForm("addPizza", "Home", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <div class="form-horizontal">
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                @Html.Label("Total of pizzas", htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-10">
+                                    @Html.EditorFor(model => model.pizza.Total, new { htmlAttributes = new { @class = "form-control" } })
+                                    @Html.ValidationMessageFor(model => model.pizza.Total, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.Label("Ingredients", htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-10">
+                                    @for (var i = 0; i < Model.pizza.Ingredients.Count; i++)
+                                    {
+                                        <div class="form-check">
+                                            @Html.HiddenFor(model => model.pizza.Ingredients[i].Name)
+                                            @Html.HiddenFor(model => model.pizza.Ingredients[i].Price)
+                                            @Html.CheckBoxFor(model => model.pizza.Ingredients[i].Selected, new { @class = "form-check-input" })
+                                            @Html.Label(Model.pizza.Ingredients[i].Name, new { @class = "form-check-label" })
+                                            @Html.Label("($" + Model.pizza.Ingredients[i].Price.ToString() + ")", new { @class = "form-check-label" })
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.Label("Sizes", htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-10">
+                                    @for (var i = 0; i < Model.pizza.Sizes.Count; i++)
+                                    {
+                                        <div class="form-check">
+                                            @Html.RadioButtonFor(model => model.pizza.SelectedSize, Model.pizza.Sizes[i].Item1, new { @class = "form-check-input" })
+                                            @Html.LabelFor(model => model.pizza.Sizes[i].Item1, Model.pizza.Sizes[i].Item1, new { @class = "form-check-label" })
+                                            @Html.LabelFor(model => model.pizza.Sizes[i].Item2, "($" + Model.pizza.Sizes[i].Item2.ToString() + ")", new { @class = "form-check-label" })
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <input type="submit" value="Add pizza" class="btn btn-success" />
+                        </div>
+                        <div class="col-6">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Ingredients</th>
+                                        <th scope="col">Size</th>
+                                        <th scope="col">Total of pizzas</th>
+                                        <th scope="col">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        TempData["pizzas"] = ViewBag.pizzas;
+                                        if (ViewBag.pizzas.Count == 0)
+                                        {
+                                            <tr>
+                                                <th scope="row" colspan="4" class="text-center">There are not pizzas</th>
+                                            </tr>
+                                        } else { 
+                                            for (var i = 0; i < ViewBag.pizzas.Count; i++)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @foreach (Pizzas.Models.Ingredient ingredient in ViewBag.pizzas[i].Ingredients)
+                                                        {
+                                                            <p>@ingredient.Name ($@ingredient.Price)</p>
+                                                        }
+                                                    </td>
+                                                    <td>@ViewBag.pizzas[i].SelectedSize</td>
+                                                    <td>@ViewBag.pizzas[i].Total</td>
+                                                    <td>$@ViewBag.pizzas[i].Subtotal</td>
+                                                </tr>
+                                            }
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+</div>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
